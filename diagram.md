@@ -1,49 +1,47 @@
 ```mermaid
-sequenceDiagram
-    actor C as Customer
-    participant S as "Жүйе"
-    participant PG as "Төлем шлюзі"
-    participant A as "Администратор"
-    participant P1 as "Подрядчик 1"
-    participant P2 as "Подрядчик 2"
-    participant M as "Менеджер"
+@startuml
 
-    %% Брондау запросы
-    C->>S: Площадка қолжетімді ме?
-    S->>S: Тексеру
-    alt қолжетімді
-        S-->>C: Ақпарат беру + баға
-    else қолжетімсіз
-        S-->>C: Басқа күн таңдаңыз
-        Note over C,S: return
-    end
+title Компонент диаграммасы: Orders жүйесі
 
-    %% Төлем
-    C->>S: Брондауды растау
-    S->>PG: Төлем сұранысы
-    alt төлем сәтті
-        PG-->>S: OK
-        S->>A: Брон расталды (хабарлама)
-    else төлем сәтсіз
-        PG-->>S: Қате
-        S-->>C: Төлемді қайта жасаңыз
-        Note over C,S: return
-    end
+package "Frontend" {
+  [Client Web App]
+  [Courier Mobile App]
+}
 
-    %% Ұйымдастыру
-    A->>A: Тапсырмалар жоспарлау
-    par Подрядчиктерге хабарлау
-        A->>P1: Тапсырма
-        A->>P2: Тапсырма
-    end
-    par Тапсырманы орындау
-        P1-->>A: Аяқталды
-        P2-->>A: Аяқталды
-    end
-    A->>S: Барлығы дайын
+package "Backend" {
+  [Orders Management]
+  [Warehouse Management]
+  [Route Optimization]
+  [Courier Integration]
+  [Notification Service]
+  [Analytics Service]
+  [Auth Security]
+}
 
-    %% Мероприятие аяқталуы
-    S->>C: Пікір қалдыру
-    S->>M: Пікірлер туралы есеп
+database "Main DB" as DB
+actor "External Courier API" as CourierAPI
+actor "Payment Gateway" as PaymentAPI
+
+' Connections
+[Client Web App] --> [Orders Management] : REST API
+[Courier Mobile App] --> [Orders Management] : REST / WebSocket
+
+[Orders Management] --> DB : CRUD (orders)
+[Warehouse Management] --> DB : Inventory
+
+[Orders Management] --> [Route Optimization] : route request
+[Route Optimization] --> CourierAPI : location data
+
+[Orders Management] --> [Courier Integration] : assign courier
+CourierAPI --> [Courier Integration] : tracking updates
+
+[Orders Management] --> [Notification Service] : send events
+[Notification Service] --> [Client Web App] : sms/push/email
+
+[Analytics Service] --> DB : analytics
+[Orders Management] --> PaymentAPI : payments
+
+@enduml
+
 
 ```
