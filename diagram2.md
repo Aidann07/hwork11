@@ -1,40 +1,44 @@
 ```mermaid
 graph TD
+    %% Frontend
     subgraph Frontend
-        ClientWeb[Client Web App]
-        CourierMobile[Courier Mobile App]
+        ClientWeb["Client Web App"]
+        CourierMobile["Courier Mobile App"]
     end
 
+    %% Backend
     subgraph Backend
-        OrdersManagement[Orders Management]
-        WarehouseManagement[Warehouse Management]
-        RouteOptimization[Route Optimization]
-        CourierIntegration[Courier Integration]
-        NotificationService[Notification Service]
-        AnalyticsService[Analytics Service]
-        AuthSecurity[Auth Security]
+        OrdersManagement["Orders Management"]
+        WarehouseManagement["Warehouse Management"]
+        RouteOptimization["Route Optimization"]
+        CourierIntegration["Courier Integration"]
+        NotificationService["Notification Service"]
+        AnalyticsService["Analytics Service"]
+        AuthSecurity["Auth Security"]
     end
 
-    DB[Main DB]
+    %% Database and external actors
+    DB["Main DB"]
     CourierAPI["External Courier API"]
     PaymentAPI["Payment Gateway"]
 
-    ClientWeb -->|"REST API"| OrdersManagement
-    CourierMobile -->|"REST / WebSocket"| OrdersManagement
+    %% Connections
+    ClientWeb --> OrdersManagement
+    CourierMobile --> OrdersManagement
 
-    OrdersManagement -->|"CRUD orders"| DB
-    WarehouseManagement -->|"Inventory"| DB
+    OrdersManagement --> DB
+    WarehouseManagement --> DB
 
-    OrdersManagement -->|"route request"| RouteOptimization
-    RouteOptimization -->|"location data"| CourierAPI
+    OrdersManagement --> RouteOptimization
+    RouteOptimization --> CourierAPI
 
-    OrdersManagement -->|"assign courier"| CourierIntegration
-    CourierAPI -->|"tracking updates"| CourierIntegration
+    OrdersManagement --> CourierIntegration
+    CourierAPI --> CourierIntegration
 
-    OrdersManagement -->|"send events"| NotificationService
-    NotificationService -->|"sms/push/email"| ClientWeb
+    OrdersManagement --> NotificationService
+    NotificationService --> ClientWeb
 
-    AnalyticsService -->|"analytics"| DB
-    OrdersManagement -->|"payments"| PaymentAPI
+    AnalyticsService --> DB
+    OrdersManagement --> PaymentAPI
 
 ```
