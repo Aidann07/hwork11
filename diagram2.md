@@ -1,3 +1,4 @@
+```mermaid
 %% Компонент диаграммасы: Orders жүйесі
 graph TD
     %% Frontend пакеті
@@ -42,3 +43,4 @@ graph TD
 
     AnalyticsService -->|analytics| DB
     OrdersManagement -->|payments| PaymentAPI
+```
