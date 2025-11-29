@@ -1,178 +1,112 @@
 ```mermaid
-abstract class User {
-  - id: Long
-  - name: String
-  - email: String
-  - phone: String
-  - address: String
-  - role: String
-  + register()
-  + login()
-  + updateData()
-}
+classDiagram
+    class User {
+        <<abstract>>
+        - int id
+        - String name
+        - String email
+        - String address
+        - String phone
+        - String role
+        + register()
+        + login()
+        + updateData()
+    }
 
-class Customer {
-  - loyaltyPoints: int
-  - orderHistory: List<Order>
-  + addToCart(p: Product, qty: int)
-  + checkout()
-  + leaveReview(p: Product, r: Review)
-}
+    class Client {
+        - int loyaltyPoints
+        + addPoints()
+    }
 
-class Admin {
-  - logEntries: List<AdminLog>
-  + createProduct(...)
-  + updateProduct(...)
-  + deleteProduct(...)
-  + viewLogs()
-}
+    class Admin {
+        + logAction()
+    }
 
-class Product {
-  - id: Long
-  - name: String
-  - description: String
-  - price: BigDecimal
-  - sku: String
-  + create()
-  + update()
-  + delete()
-}
+    User <|-- Client
+    User <|-- Admin
 
-class Category {
-  - id: Long
-  - name: String
-  + addCategory()
-  + removeCategory()
-}
+    class Category {
+        - int id
+        - String name
+    }
 
-class Warehouse {
-  - id: Long
-  - location: String
-  - inventory: Map<Product,Integer>
-  + getStock(p: Product): int
-  + reserve(p: Product, qty: int)
-  + release(p: Product, qty: int)
-}
+    class Product {
+        - int id
+        - String title
+        - String description
+        - double price
+        - int stock
+        - Category category
+        + create()
+        + update()
+        + delete()
+    }
 
-class Cart {
-  - id: Long
-  - customer: Customer
-  - items: List<CartItem>
-  - promoCode: PromoCode
-  + addItem(p: Product, qty: int)
-  + removeItem(p: Product)
-  + applyPromo(code: PromoCode)
-  + calculateTotal(): BigDecimal
-}
+    Category "1" --> "many" Product
 
-class CartItem {
-  - product: Product
-  - quantity: int
-  - unitPrice: BigDecimal
-}
+    class PromoCode {
+        - String code
+        - double discount
+        + apply()
+    }
 
-class Order {
-  - id: Long
-  - createdAt: Date
-  - status: OrderStatus
-  - customer: Customer
-  - items: List<OrderItem>
-  - total: BigDecimal
-  - payment: Payment
-  - shipment: Shipment
-  + placeOrder()
-  + cancelOrder()
-  + pay(pm: PaymentMethod)
-  + refund()
-}
+    class Cart {
+        - List~Product~ products
+        - PromoCode promo
+        + addProduct()
+        + removeProduct()
+        + applyPromo()
+        + calculateTotal()
+    }
 
-class OrderItem {
-  - product: Product
-  - quantity: int
-  - price: BigDecimal
-}
+    Cart --> PromoCode
+    Cart "1" --> "many" Product
 
-class Payment {
-  - id: Long
-  - type: PaymentType
-  - amount: BigDecimal
-  - status: PaymentStatus
-  - date: Date
-  - transactionId: String
-  + process()
-  + refund()
-}
+    class Payment {
+        - int id
+        - String type
+        - double sum
+        - String status
+        - Date date
+        + process()
+        + refund()
+    }
 
-abstract class PaymentMethod {
-  + processPayment(amount: BigDecimal): Payment
-  + refundPayment(txId: String): boolean
-}
+    class Delivery {
+        - int id
+        - String address
+        - String status
+        - String courier
+        + send()
+        + track()
+        + complete()
+    }
 
-class CardPayment
-class EWalletPayment
+    class Order {
+        - int id
+        - Client client
+        - List~Product~ products
+        - double total
+        - String status
+        - Payment payment
+        - Delivery delivery
+        + place()
+        + cancel()
+        + pay()
+    }
 
-class Shipment {
-  - id: Long
-  - address: String
-  - status: ShipmentStatus
-  - courier: Courier
-  - trackingNumber: String
-  + ship()
-  + track()
-  + complete()
-}
+    Client "1" --> "many" Order
+    Order "many" --> "many" Product
+    Order "1" --> "1" Payment
+    Order "1" --> "1" Delivery
 
-class Courier {
-  - id: Long
-  - name: String
-  - phone: String
-  - assignedShipments: List<Shipment>
-  + assign(s: Shipment)
-}
+    class Review {
+        - int id
+        - int rating
+        - String text
+    }
 
-class PromoCode {
-  - code: String
-  - discountPercent: double
-  - flatAmount: BigDecimal
-  - validFrom: Date
-  - validTo: Date
-  + isValid(): boolean
-  + apply(total: BigDecimal): BigDecimal
-}
-
-class Review {
-  - id: Long
-  - product: Product
-  - customer: Customer
-  - rating: int
-  - comment: String
-  - createdAt: Date
-  + publish()
-}
-
-class AdminLog {
-  - id: Long
-  - admin: Admin
-  - action: String
-  - timestamp: Date
-}
-
-' --- Наследования ---
-User <|-- Customer
-User <|-- Admin
-PaymentMethod <|-- CardPayment
-PaymentMethod <|-- EWalletPayment
-
-' --- Ассоциации и мультиплицитет ---
-Customer "1" -- "0..*" Order
-Order "1" -- "0..*" OrderItem
-OrderItem "*" -- "1" Product
-Product "*" -- "1" Category
-Order "1" -- "0..1" Shipment
-Shipment "1" -- "0..1" Courier
-Customer "1" -- "1" Cart
-Cart "1" -- "0..*" CartItem
-Warehouse "1" -- "*" Product : inventory
-Product "0..*" -- "0..*" Warehouse : stocked_in
+    Client "1" --> "many" Review
+    Product "1" --> "many" Review
 
 ```
