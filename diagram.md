@@ -1,47 +1,48 @@
 ```mermaid
-@startuml
+%% Компонент диаграммасы: Orders жүйесі
+graph TD
+    %% Frontend пакеті
+    subgraph Frontend
+        ClientWeb[Client Web App]
+        CourierMobile[Courier Mobile App]
+    end
 
-title Компонент диаграммасы: Orders жүйесі
+    %% Backend пакеті
+    subgraph Backend
+        OrdersManagement[Orders Management]
+        WarehouseManagement[Warehouse Management]
+        RouteOptimization[Route Optimization]
+        CourierIntegration[Courier Integration]
+        NotificationService[Notification Service]
+        AnalyticsService[Analytics Service]
+        AuthSecurity[Auth Security]
+    end
 
-package "Frontend" {
-  [Client Web App]
-  [Courier Mobile App]
-}
+    %% Database
+    DB[Main DB]
 
-package "Backend" {
-  [Orders Management]
-  [Warehouse Management]
-  [Route Optimization]
-  [Courier Integration]
-  [Notification Service]
-  [Analytics Service]
-  [Auth Security]
-}
+    %% External actors
+    CourierAPI["External Courier API"]
+    PaymentAPI["Payment Gateway"]
 
-database "Main DB" as DB
-actor "External Courier API" as CourierAPI
-actor "Payment Gateway" as PaymentAPI
+    %% Connections
+    ClientWeb -->|REST API| OrdersManagement
+    CourierMobile -->|REST / WebSocket| OrdersManagement
 
-' Connections
-[Client Web App] --> [Orders Management] : REST API
-[Courier Mobile App] --> [Orders Management] : REST / WebSocket
+    OrdersManagement -->|CRUD (orders)| DB
+    WarehouseManagement -->|Inventory| DB
 
-[Orders Management] --> DB : CRUD (orders)
-[Warehouse Management] --> DB : Inventory
+    OrdersManagement -->|route request| RouteOptimization
+    RouteOptimization -->|location data| CourierAPI
 
-[Orders Management] --> [Route Optimization] : route request
-[Route Optimization] --> CourierAPI : location data
+    OrdersManagement -->|assign courier| CourierIntegration
+    CourierAPI -->|tracking updates| CourierIntegration
 
-[Orders Management] --> [Courier Integration] : assign courier
-CourierAPI --> [Courier Integration] : tracking updates
+    OrdersManagement -->|send events| NotificationService
+    NotificationService -->|sms/push/email| ClientWeb
 
-[Orders Management] --> [Notification Service] : send events
-[Notification Service] --> [Client Web App] : sms/push/email
-
-[Analytics Service] --> DB : analytics
-[Orders Management] --> PaymentAPI : payments
-
-@enduml
+    AnalyticsService -->|analytics| DB
+    OrdersManagement -->|payments| PaymentAPI
 
 
 ```
