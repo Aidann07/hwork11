@@ -1,48 +1,49 @@
 ```mermaid
-%% Компонент диаграммасы: Orders жүйесі
-graph TD
-    %% Frontend пакеті
-    subgraph Frontend
-        ClientWeb[Client Web App]
-        CourierMobile[Courier Mobile App]
+sequenceDiagram
+    actor C as Customer
+    participant S as "Жүйе"
+    participant PG as "Төлем шлюзі"
+    participant A as "Администратор"
+    participant P1 as "Подрядчик 1"
+    participant P2 as "Подрядчик 2"
+    participant M as "Менеджер"
+
+    %% Брондау запросы
+    C->>S: Площадка қолжетімді ме?
+    S->>S: Тексеру
+    alt қолжетімді
+        S-->>C: Ақпарат беру + баға
+    else қолжетімсіз
+        S-->>C: Басқа күн таңдаңыз
+        Note over C,S: return
     end
 
-    %% Backend пакеті
-    subgraph Backend
-        OrdersManagement[Orders Management]
-        WarehouseManagement[Warehouse Management]
-        RouteOptimization[Route Optimization]
-        CourierIntegration[Courier Integration]
-        NotificationService[Notification Service]
-        AnalyticsService[Analytics Service]
-        AuthSecurity[Auth Security]
+    %% Төлем
+    C->>S: Брондауды растау
+    S->>PG: Төлем сұранысы
+    alt төлем сәтті
+        PG-->>S: OK
+        S->>A: Брон расталды (хабарлама)
+    else төлем сәтсіз
+        PG-->>S: Қате
+        S-->>C: Төлемді қайта жасаңыз
+        Note over C,S: return
     end
 
-    %% Database
-    DB[Main DB]
+    %% Ұйымдастыру
+    A->>A: Тапсырмалар жоспарлау
+    par Подрядчиктерге хабарлау
+        A->>P1: Тапсырма
+        A->>P2: Тапсырма
+    end
+    par Тапсырманы орындау
+        P1-->>A: Аяқталды
+        P2-->>A: Аяқталды
+    end
+    A->>S: Барлығы дайын
 
-    %% External actors
-    CourierAPI["External Courier API"]
-    PaymentAPI["Payment Gateway"]
-
-    %% Connections
-    ClientWeb -->|REST API| OrdersManagement
-    CourierMobile -->|REST / WebSocket| OrdersManagement
-
-    OrdersManagement -->|CRUD (orders)| DB
-    WarehouseManagement -->|Inventory| DB
-
-    OrdersManagement -->|route request| RouteOptimization
-    RouteOptimization -->|location data| CourierAPI
-
-    OrdersManagement -->|assign courier| CourierIntegration
-    CourierAPI -->|tracking updates| CourierIntegration
-
-    OrdersManagement -->|send events| NotificationService
-    NotificationService -->|sms/push/email| ClientWeb
-
-    AnalyticsService -->|analytics| DB
-    OrdersManagement -->|payments| PaymentAPI
-
+    %% Мероприятие аяқталуы
+    S->>C: Пікір қалдыру
+    S->>M: Пікірлер туралы есеп
 
 ```
